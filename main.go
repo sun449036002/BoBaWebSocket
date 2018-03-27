@@ -9,7 +9,7 @@ import (
 "github.com/satori/go.uuid"
 	"github.com/garyburd/redigo/redis"
 	"github.com/json-iterator/go"
-	"talkGo/structs"
+	"talkGo/models"
 )
 
 type ClientManager struct {
@@ -115,16 +115,16 @@ func (c *Client) read() {
 			break
 		}
 
-		userinfo := &structs.Userinfo{}
-		err = jsoniter.UnmarshalFromString(userinfoJson, &userinfo)
+		user := models.User{}
+		err = jsoniter.UnmarshalFromString(userinfoJson, &user)
 		if err != nil {
 			fmt.Println("userinfo json decode faild")
 			break
 		}
 
-		fmt.Println("nickname", userinfo.NickName)
+		fmt.Println("nickname", user.Username)
 
-		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: jsonContent.Val, Nickname:userinfo.NickName})
+		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: jsonContent.Val, Nickname : user.Username})
 		manager.broadcast <- jsonMessage
 	}
 }
