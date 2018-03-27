@@ -8,6 +8,7 @@ import (
 "github.com/gorilla/websocket"
 "github.com/satori/go.uuid"
 	//"github.com/garyburd/redigo/redis"
+	"github.com/json-iterator/go"
 )
 
 type ClientManager struct {
@@ -27,6 +28,11 @@ type Message struct {
 	Sender    string `json:"sender,omitempty"`
 	Recipient string `json:"recipient,omitempty"`
 	Content   string `json:"content,omitempty"`
+}
+
+type Content struct {
+	Val string
+	sk string
 }
 
 var manager = ClientManager{
@@ -78,7 +84,7 @@ func (c *Client) read() {
 	}()
 
 	for {
-		msgType, message, err := c.socket.ReadMessage()
+		_, message, err := c.socket.ReadMessage()
 		if err != nil {
 			manager.unregister <- c
 			c.socket.Close()
@@ -87,8 +93,9 @@ func (c *Client) read() {
 
 		//todo 取得用户信息
 		//redis.Dial("tcp", "127.0.0.1:6379")
-
-		fmt.Println(msgType)
+		jsonStr := string(message)
+		jsonData := jsoniter.Unmarshal([]byte(jsonStr), &Content{})
+		println(jsonData)
 
 
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
