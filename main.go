@@ -7,6 +7,7 @@ import (
 
 "github.com/gorilla/websocket"
 "github.com/satori/go.uuid"
+	"github.com/garyburd/redigo/redis"
 )
 
 type ClientManager struct {
@@ -83,6 +84,13 @@ func (c *Client) read() {
 			c.socket.Close()
 			break
 		}
+
+		//todo 取得用户信息
+		//redis.Dial("tcp", "127.0.0.1:6379")
+
+		fmt.Println(message)
+
+
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
 		manager.broadcast <- jsonMessage
 	}
