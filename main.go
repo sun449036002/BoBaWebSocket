@@ -7,7 +7,7 @@ import (
 
 "github.com/gorilla/websocket"
 "github.com/satori/go.uuid"
-	"github.com/garyburd/redigo/redis"
+	//"github.com/garyburd/redigo/redis"
 )
 
 type ClientManager struct {
