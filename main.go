@@ -122,6 +122,8 @@ func (c *Client) read() {
 			break
 		}
 
+		fmt.Println("nickname", userinfo.NickName)
+
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: jsonContent.Val, Nickname:userinfo.NickName})
 		manager.broadcast <- jsonMessage
 	}
