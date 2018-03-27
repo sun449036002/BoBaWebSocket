@@ -99,7 +99,7 @@ func (c *Client) read() {
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		println(jsonContent)
+		println(jsonContent.Val)
 
 
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
