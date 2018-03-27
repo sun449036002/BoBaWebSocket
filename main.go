@@ -78,7 +78,7 @@ func (c *Client) read() {
 	}()
 
 	for {
-		_, message, err := c.socket.ReadMessage()
+		msgType, message, err := c.socket.ReadMessage()
 		if err != nil {
 			manager.unregister <- c
 			c.socket.Close()
@@ -88,7 +88,7 @@ func (c *Client) read() {
 		//todo 取得用户信息
 		//redis.Dial("tcp", "127.0.0.1:6379")
 
-		fmt.Println(message)
+		fmt.Println(msgType)
 
 
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
