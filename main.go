@@ -35,7 +35,7 @@ type Message struct {
 
 type Content struct {
 	Val string
-	sk string
+	Sk string
 }
 
 var manager = ClientManager{
@@ -107,11 +107,11 @@ func (c *Client) read() {
 			fmt.Println(err.Error())
 			break
 		}
-		fmt.Println(jsonContent.Val, jsonContent.sk)
+		fmt.Println(jsonContent.Val, jsonContent.Sk)
 
-		userinfoJson, err := redis.String(rc.Do("get", "userinfo_" + jsonContent.sk))
+		userinfoJson, err := redis.String(rc.Do("get", "userinfo_" + jsonContent.Sk))
 		if err != nil {
-			fmt.Println("get userinfo_" + jsonContent.sk,  err)
+			fmt.Println("get userinfo_" + jsonContent.Sk,  err)
 			break
 		}
 
