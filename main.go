@@ -94,8 +94,12 @@ func (c *Client) read() {
 		//todo 取得用户信息
 		//redis.Dial("tcp", "127.0.0.1:6379")
 		jsonStr := string(message)
-		jsonData := jsoniter.Unmarshal([]byte(jsonStr), &Content{})
-		println(jsonData)
+		jsonContent :=  &Content{}
+		err = jsoniter.Unmarshal([]byte(jsonStr), &jsonContent)
+		if err != nil {
+			fmt.Println(err)
+		}
+		println(jsonContent)
 
 
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
