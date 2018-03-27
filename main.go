@@ -95,9 +95,9 @@ func (c *Client) read() {
 		//redis.Dial("tcp", "127.0.0.1:6379")
 		jsonStr := string(message)
 		jsonContent :=  &Content{}
-		err = jsoniter.Unmarshal([]byte(jsonStr), &jsonContent)
+		err = jsoniter.UnmarshalFromString(jsonStr, &jsonContent)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error())
 		}
 		println(jsonContent)
 
