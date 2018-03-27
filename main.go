@@ -107,11 +107,12 @@ func (c *Client) read() {
 			fmt.Println(err.Error())
 			break
 		}
-		fmt.Println(jsonContent.sk)
+		fmt.Println(jsonContent.Val, jsonContent.sk)
 
 		userinfoJson, err := redis.String(rc.Do("get", "userinfo_" + jsonContent.sk))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("get userinfo_" + jsonContent.sk,  err)
+			break
 		}
 
 		userinfo := &structs.Userinfo{}
