@@ -7,8 +7,9 @@ import (
 
 "github.com/gorilla/websocket"
 "github.com/satori/go.uuid"
-	//"github.com/garyburd/redigo/redis"
+	"github.com/garyburd/redigo/redis"
 	"github.com/json-iterator/go"
+	"talkGo/structs"
 )
 
 type ClientManager struct {
@@ -28,6 +29,8 @@ type Message struct {
 	Sender    string `json:"sender,omitempty"`
 	Recipient string `json:"recipient,omitempty"`
 	Content   string `json:"content,omitempty"`
+	Nickname   string `json:"nickname,omitempty"`
+	AvatarUrl   string `json:"avatarurl,omitempty"`
 }
 
 type Content struct {
@@ -91,18 +94,34 @@ func (c *Client) read() {
 			break
 		}
 
-		//todo 取得用户信息
-		//redis.Dial("tcp", "127.0.0.1:6379")
+		//取得用户信息
+		rc, err := redis.Dial("tcp", "127.0.0.1:6379")
+		if err != nil {
+			fmt.Println("redis connect faild.....")
+			break
+		}
 		jsonStr := string(message)
 		jsonContent :=  &Content{}
 		err = jsoniter.UnmarshalFromString(jsonStr, &jsonContent)
 		if err != nil {
 			fmt.Println(err.Error())
+			break
 		}
-		println(jsonContent.Val)
+		fmt.Println(jsonContent.sk)
 
+		userinfoJson, err := redis.String(rc.Do("get", "userinfo_" + jsonContent.sk))
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
+		userinfo := &structs.Userinfo{}
+		err = jsoniter.UnmarshalFromString(userinfoJson, &userinfo)
+		if err != nil {
+			fmt.Println("userinfo json decode faild")
+			break
+		}
+
+		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: jsonContent.Val, Nickname:userinfo.NickName})
 		manager.broadcast <- jsonMessage
 	}
 }
