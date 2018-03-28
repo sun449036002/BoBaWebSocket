@@ -163,6 +163,11 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(error)
 		return
 	}
+
+	bts := make([]byte, 0)
+	lens, _ := req.Body.Read(bts)
+	fmt.Println("request" , lens, bts)
+
 	uid, _:= uuid.NewV4()
 	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte)}
 
