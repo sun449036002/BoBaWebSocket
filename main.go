@@ -50,13 +50,13 @@ func (manager *ClientManager) start() {
 		select {
 		case conn := <-manager.register:
 			manager.clients[conn] = true
-			jsonMessage, _ := json.Marshal(&Message{Content: "/A new socket has connected."})
+			jsonMessage, _ := json.Marshal(&Message{Content: "one new person has connected."})
 			manager.send(jsonMessage, conn)
 		case conn := <-manager.unregister:
 			if _, ok := manager.clients[conn]; ok {
 				close(conn.send)
 				delete(manager.clients, conn)
-				jsonMessage, _ := json.Marshal(&Message{Content: "/A socket has disconnected."})
+				jsonMessage, _ := json.Marshal(&Message{Content: "one person has disconnected."})
 				manager.send(jsonMessage, conn)
 			}
 		case message := <-manager.broadcast:
@@ -166,7 +166,7 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 
 	bts := make([]byte, 0)
 	lens, _ := req.Body.Read(bts)
-	fmt.Println("request" , lens, bts)
+	fmt.Println("request" , lens, bts, req.Host, req.Method)
 
 	uid, _:= uuid.NewV4()
 	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte)}
