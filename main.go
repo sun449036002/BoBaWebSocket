@@ -143,16 +143,9 @@ func (c *Client) read() {
 		}
 		fmt.Println(jsonContent.Val, jsonContent.Sk)
 
-		userinfoJson, err := redis.String(rc.Do("get", "userinfo_" + jsonContent.Sk))
+		user, err := GetUserBySessionKey(rc, jsonContent.Sk)
 		if err != nil {
-			fmt.Println("get userinfo_" + jsonContent.Sk,  err)
-			break
-		}
-
-		user := models.User{}
-		err = jsoniter.UnmarshalFromString(userinfoJson, &user)
-		if err != nil {
-			fmt.Println("userinfo json decode faild")
+			fmt.Println(err.Error())
 			break
 		}
 
