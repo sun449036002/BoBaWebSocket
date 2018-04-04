@@ -11,7 +11,10 @@ import (
 	"github.com/json-iterator/go"
 	"talkGo/models"
 	"strings"
+	"errors"
 )
+
+const ROOM_PERSON_NUMS_CACHE  = "room_person_nums_cache_%s"
 
 type ClientManager struct {
 	clients    map[*Client]bool
@@ -33,7 +36,8 @@ type Message struct {
 	Recipient string `json:"recipient,omitempty"`
 	Content   string `json:"content,omitempty"`
 	Nickname   string `json:"nickname,omitempty"`
-	AvatarUrl   string `json:"avatarurl,omitempty"`
+	AvatarUrl   string `json:"avatarUrl,omitempty"`
+	PersonNum   string `json:"personNum,omitempty"`
 }
 
 type Content struct {
@@ -49,19 +53,44 @@ var manager = ClientManager{
 }
 
 func (manager *ClientManager) start() {
+	rc, err := redis.Dial("tcp", "127.0.0.1:6379")
+	if err != nil {
+		fmt.Println("redis connect faild.....")
+	}
+
 	for {
 		select {
 		case conn := <-manager.register:
 			manager.clients[conn] = true
 			fmt.Println("register:room ID =", conn.roomId)
 			fmt.Println("register:sessionKey =", conn.sessionKey)
-			jsonMessage, _ := json.Marshal(&Message{Content: "one new person has connected."})
+
+			//累计人数
+			num, _:= redis.String(rc.Do("INCR", fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)))
+
+			user, err := GetUserBySessionKey(rc, conn.sessionKey)
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+
+			jsonMessage, _ := json.Marshal(&Message{Content: "one new person has connected.", Nickname:user.Username, PersonNum:num})
 			manager.send(jsonMessage, conn)
 		case conn := <-manager.unregister:
 			if _, ok := manager.clients[conn]; ok {
 				close(conn.send)
 				delete(manager.clients, conn)
-				jsonMessage, _ := json.Marshal(&Message{Content: "one person has disconnected."})
+
+				//累计人数
+				num, _:= redis.String(rc.Do("DECR", fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)))
+
+				user, err := GetUserBySessionKey(rc, conn.sessionKey)
+				if err != nil {
+					fmt.Println(err.Error())
+					continue
+				}
+
+				jsonMessage, _ := json.Marshal(&Message{Content: "one person has disconnected.", Nickname:user.Username, PersonNum:num})
 				manager.send(jsonMessage, conn)
 			}
 		case message := <-manager.broadcast:
@@ -181,9 +210,9 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 		paramsMap[kv[0]] = kv[1]
 	}
 
-	println(paramsMap["rid"])
+	println(paramsMap["roomId"])
 	println(paramsMap["sessionKey"])
-	roomId, ok := paramsMap["rid"]
+	roomId, ok := paramsMap["roomId"]
 	if !ok {
 		roomId = ""
 	}
@@ -200,4 +229,24 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	go client.read()
 	go client.write()
 	//fmt.Println("server start ok")
+}
+
+
+/**
+获取 缓存中的用户信息
+ */
+func GetUserBySessionKey(rc redis.Conn, sessionKey string) (models.User, error) {
+	userinfoJson, err := redis.String(rc.Do("GET", "userinfo_" + sessionKey))
+	if err != nil {
+		print("get user info redis fail")
+		return models.User{}, errors.New("get user info redis fail")
+	}
+	user := models.User{}
+	err = jsoniter.UnmarshalFromString(userinfoJson, &user)
+	if err != nil {
+		fmt.Println("userinfo json decode faild")
+		return models.User{}, errors.New("userinfo json decode faild")
+	}
+
+	return user, nil
 }
