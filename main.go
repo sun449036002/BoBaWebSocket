@@ -24,6 +24,8 @@ type Client struct {
 	id     string
 	socket *websocket.Conn
 	send   chan []byte
+	roomId string
+	sessionKey string //用户Session KEY
 }
 
 type Message struct {
@@ -51,6 +53,8 @@ func (manager *ClientManager) start() {
 		select {
 		case conn := <-manager.register:
 			manager.clients[conn] = true
+			fmt.Println("register:room ID =", conn.roomId)
+			fmt.Println("register:sessionKey =", conn.sessionKey)
 			jsonMessage, _ := json.Marshal(&Message{Content: "one new person has connected."})
 			manager.send(jsonMessage, conn)
 		case conn := <-manager.unregister:
@@ -178,9 +182,18 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	println(paramsMap["rid"])
+	println(paramsMap["sessionKey"])
+	roomId, ok := paramsMap["rid"]
+	if !ok {
+		roomId = ""
+	}
+	sessionKey, ok := paramsMap["sessionKey"]
+	if !ok {
+		sessionKey = ""
+	}
 
 	uid, _:= uuid.NewV4()
-	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte)}
+	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte), roomId:roomId, sessionKey:sessionKey}
 
 	manager.register <- client
 
