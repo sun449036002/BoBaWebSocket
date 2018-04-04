@@ -155,7 +155,6 @@ func main() {
 }
 
 func wsPage(res http.ResponseWriter, req *http.Request) {
-	//fmt.Println(req, res)
 	conn, error := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}).Upgrade(res, req, nil)
 
 	if error != nil {
@@ -168,8 +167,8 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	lens, _ := req.Body.Read(bts)
 	fmt.Println("request" , lens, bts, req.Host, req.Method)
 
+	fmt.Println("form ", req.Form.Encode())
 	fmt.Println("post form ", req.PostForm.Encode())
-	fmt.Println("rid", req.PostForm.Get("rid"))
 
 	uid, _:= uuid.NewV4()
 	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte)}
