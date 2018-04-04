@@ -167,6 +167,10 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	lens, _ := req.Body.Read(bts)
 	fmt.Println("request" , lens, bts, req.Host, req.Method)
 
+	fmt.Println("url ", req.URL.String())
+	fmt.Println("ContentLength ", req.ContentLength)
+	fmt.Println("Header ", req.Header)
+	fmt.Println("TransferEncoding ", req.TransferEncoding)
 	fmt.Println("form ", req.Form.Encode())
 	fmt.Println("post form ", req.PostForm.Encode())
 
