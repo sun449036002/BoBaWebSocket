@@ -10,6 +10,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/json-iterator/go"
 	"talkGo/models"
+	"strings"
 )
 
 type ClientManager struct {
@@ -167,12 +168,16 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	lens, _ := req.Body.Read(bts)
 	fmt.Println("request" , lens, bts, req.Host, req.Method)
 
-	fmt.Println("url ", req.URL.String())
-	fmt.Println("ContentLength ", req.ContentLength)
-	fmt.Println("Header ", req.Header)
-	fmt.Println("TransferEncoding ", req.TransferEncoding)
-	fmt.Println("form ", req.Form.Encode())
-	fmt.Println("post form ", req.PostForm.Encode())
+	paramsMap := make(map[string]string)
+	paramStr := strings.SplitAfter(req.URL.String(), "?")[1]
+	params := strings.Split(paramStr, "&")
+	for i := 0; i < len(params); i++ {
+		fmt.Println(params[i])
+		kv := strings.Split(params[i], "=")
+		paramsMap[kv[0]] = kv[1]
+	}
+
+	println(paramsMap["rid"])
 
 	uid, _:= uuid.NewV4()
 	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte)}
