@@ -168,6 +168,7 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	lens, _ := req.Body.Read(bts)
 	fmt.Println("request" , lens, bts, req.Host, req.Method)
 
+	fmt.Println("post form ", req.PostForm.Encode())
 	fmt.Println("rid", req.PostForm.Get("rid"))
 
 	uid, _:= uuid.NewV4()
