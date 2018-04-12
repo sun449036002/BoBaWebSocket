@@ -232,13 +232,13 @@ func GetUserBySessionKey(rc redis.Conn, sessionKey string) (models.User, error) 
 	userinfoJson, err := redis.String(rc.Do("GET", "userinfo_" + sessionKey))
 	if err != nil {
 		print("get user info redis fail")
-		return models.User{}, errors.New("get user info redis fail")
+		return models.User{}, errors.New("get user info redis fail, " + err.Error())
 	}
 	user := models.User{}
 	err = jsoniter.UnmarshalFromString(userinfoJson, &user)
 	if err != nil {
 		fmt.Println("userinfo json decode faild")
-		return models.User{}, errors.New("userinfo json decode faild")
+		return models.User{}, errors.New("userinfo json decode faild, " + err.Error())
 	}
 
 	return user, nil
