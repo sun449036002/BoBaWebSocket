@@ -67,13 +67,14 @@ func (manager *ClientManager) start() {
 
 			//累计人数
 			num, _:= redis.String(rc.Do("INCR", fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)))
+			fmt.Println("累计人数:", num)
 
 			user, err := GetUserBySessionKey(rc, conn.sessionKey)
 			if err != nil {
 				fmt.Println("socket register :未从缓存中取到用户信息", err.Error())
 			}
 
-			jsonMessage, _ := json.Marshal(&Message{Content: "one new person has connected.", Nickname:user.Username, PersonNum:num})
+			jsonMessage, _ := json.Marshal(&Message{Content: "我 来 也~~~~~~.", Nickname:user.Username, PersonNum:num})
 			manager.send(jsonMessage, conn)
 		case conn := <-manager.unregister:
 			if _, ok := manager.clients[conn]; ok {
@@ -89,7 +90,7 @@ func (manager *ClientManager) start() {
 					continue
 				}
 
-				jsonMessage, _ := json.Marshal(&Message{Content: "one person has disconnected.", Nickname:user.Username, PersonNum:num})
+				jsonMessage, _ := json.Marshal(&Message{Content: "静静的我的走了，不带走一点云彩.", Nickname:user.Username, PersonNum:num})
 				manager.send(jsonMessage, conn)
 			}
 		case message := <-manager.broadcast:
