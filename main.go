@@ -70,8 +70,7 @@ func (manager *ClientManager) start() {
 
 			user, err := GetUserBySessionKey(rc, conn.sessionKey)
 			if err != nil {
-				fmt.Println(err.Error())
-				continue
+				fmt.Println("socket register :未从缓存中取到用户信息", err.Error())
 			}
 
 			jsonMessage, _ := json.Marshal(&Message{Content: "one new person has connected.", Nickname:user.Username, PersonNum:num})
