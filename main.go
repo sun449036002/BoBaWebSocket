@@ -66,7 +66,11 @@ func (manager *ClientManager) start() {
 			fmt.Println("register:sessionKey =", conn.sessionKey)
 
 			//累计人数
-			num, _:= redis.String(rc.Do("INCR", fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)))
+			cacheKey := fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)
+			num, err:= redis.String(rc.Do("INCR", cacheKey))
+			if err != nil {
+				println("cacheKey = ", cacheKey, err.Error())
+			}
 			fmt.Println("累计人数:", num)
 
 			user, err := GetUserBySessionKey(rc, conn.sessionKey)
