@@ -114,7 +114,8 @@ func (manager *ClientManager) start() {
 func (manager *ClientManager) send(message []byte, ignore *Client) {
 	fmt.Println("clients数量:" + strconv.Itoa(len(manager.clients)))
 	for conn := range manager.clients {
-		fmt.Println(conn.roomId, string(message))
+		fmt.Println(conn,string(message))
+		fmt.Println("conn != ignore  判断结果为:", conn != ignore)
 		if conn != ignore {
 			conn.send <- message
 		}
