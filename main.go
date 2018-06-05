@@ -52,7 +52,7 @@ var manager = ClientManager{
 	broadcast:  make(chan []byte),
 	register:   make(chan *Client),
 	unregister: make(chan *Client),
-	clients:    make([]map[*Client]bool, 0),
+	clients:    make([]map[*Client]bool, 1000),
 }
 
 func (manager *ClientManager) start() {
