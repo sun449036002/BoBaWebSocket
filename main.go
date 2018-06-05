@@ -118,9 +118,9 @@ func (manager *ClientManager) send(message []byte, roomIdNum int, ignore *Client
 	for conn := range manager.clients[roomIdNum] {
 		fmt.Println(conn,string(message))
 		fmt.Println("conn != ignore  判断结果为:", conn != ignore)
-		if conn != ignore {
+		//if conn != ignore {
 			conn.send <- message
-		}
+		//}
 	}
 }
 
