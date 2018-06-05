@@ -18,7 +18,7 @@ import (
 const ROOM_PERSON_NUMS_CACHE  = "room_person_nums_cache_%s"
 
 type ClientManager struct {
-	clients    []map[*Client]bool
+	clients    map[int]map[*Client]bool
 	broadcast  chan []byte
 	register   chan *Client
 	unregister chan *Client
@@ -52,7 +52,7 @@ var manager = ClientManager{
 	broadcast:  make(chan []byte),
 	register:   make(chan *Client),
 	unregister: make(chan *Client),
-	clients:    make([]map[*Client]bool, 1000),
+	clients:    make(map[int]map[*Client]bool),
 }
 
 func (manager *ClientManager) start() {
