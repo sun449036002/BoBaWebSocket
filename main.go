@@ -64,7 +64,9 @@ func (manager *ClientManager) start() {
 	for {
 		select {
 		case conn := <-manager.register:
-			manager.clients[conn.roomIdNum][conn] = true
+			thisRoomClients := make(map[*Client]bool)
+			thisRoomClients[conn] = true
+			manager.clients[conn.roomIdNum] = thisRoomClients
 			fmt.Println("register:room ID =", conn.roomId)
 			fmt.Println("register:sessionKey =", conn.sessionKey)
 
