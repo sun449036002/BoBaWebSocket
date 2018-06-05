@@ -112,7 +112,9 @@ func (manager *ClientManager) start() {
 }
 
 func (manager *ClientManager) send(message []byte, ignore *Client) {
+	fmt.Println("clients数量:" + strconv.Itoa(len(manager.clients)))
 	for conn := range manager.clients {
+		fmt.Println(conn, message)
 		if conn != ignore {
 			conn.send <- message
 		}
