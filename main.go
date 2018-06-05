@@ -18,7 +18,7 @@ import (
 const ROOM_PERSON_NUMS_CACHE  = "room_person_nums_cache_%s"
 
 type ClientManager struct {
-	clients    map[*Client]bool
+	clients    []map[*Client]bool
 	broadcast  chan []byte
 	register   chan *Client
 	unregister chan *Client
@@ -29,11 +29,13 @@ type Client struct {
 	socket *websocket.Conn
 	send   chan []byte
 	roomId string
+	roomIdNum int
 	sessionKey string //用户Session KEY
 }
 
 type Message struct {
 	Sender    string `json:"sender,omitempty"`
+	RoomIdNum    int `json:"roomIdNum,omitempty"`
 	Recipient string `json:"recipient,omitempty"`
 	Content   string `json:"content,omitempty"`
 	Nickname   string `json:"nickname,omitempty"`
@@ -50,7 +52,7 @@ var manager = ClientManager{
 	broadcast:  make(chan []byte),
 	register:   make(chan *Client),
 	unregister: make(chan *Client),
-	clients:    make(map[*Client]bool),
+	clients:    make([]map[*Client]bool, 0),
 }
 
 func (manager *ClientManager) start() {
@@ -62,17 +64,12 @@ func (manager *ClientManager) start() {
 	for {
 		select {
 		case conn := <-manager.register:
-			manager.clients[conn] = true
+			manager.clients[conn.roomIdNum][conn] = true
 			fmt.Println("register:room ID =", conn.roomId)
 			fmt.Println("register:sessionKey =", conn.sessionKey)
 
-			//累计人数
-			cacheKey := fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)
-			num, err:= redis.Int64(rc.Do("INCR", cacheKey))
-			if err != nil {
-				println("cacheKey = ", cacheKey, err.Error())
-			}
-			fmt.Println("累计人数:", num)
+			num := len(manager.clients[conn.roomIdNum])
+			fmt.Println("register 在线人数:", num)
 
 			user, err := GetUserBySessionKey(rc, conn.sessionKey)
 			if err != nil {
@@ -80,14 +77,15 @@ func (manager *ClientManager) start() {
 			}
 
 			jsonMessage, _ := json.Marshal(&Message{Content: "我 来 也~~~~~~.", Nickname:user.Username, PersonNum:strconv.Itoa(int(num))})
-			manager.send(jsonMessage, conn)
+			manager.send(jsonMessage, conn.roomIdNum, conn)
 		case conn := <-manager.unregister:
-			if _, ok := manager.clients[conn]; ok {
+			if _, ok := manager.clients[conn.roomIdNum][conn]; ok {
 				close(conn.send)
-				delete(manager.clients, conn)
+				delete(manager.clients[conn.roomIdNum], conn)
 
-				//累计人数
-				num, _:= redis.Int64(rc.Do("DECR", fmt.Sprintf(ROOM_PERSON_NUMS_CACHE, conn.roomId)))
+				//在线人数
+				num := len(manager.clients[conn.roomIdNum])
+				fmt.Println("unregister 在线人数:", num)
 
 				user, err := GetUserBySessionKey(rc, conn.sessionKey)
 				if err != nil {
@@ -96,24 +94,26 @@ func (manager *ClientManager) start() {
 				}
 
 				jsonMessage, _ := json.Marshal(&Message{Content: "静静的我的走了，不带走一点云彩.", Nickname:user.Username, PersonNum:strconv.Itoa(int(num))})
-				manager.send(jsonMessage, conn)
+				manager.send(jsonMessage, conn.roomIdNum, conn)
 			}
 		case message := <-manager.broadcast:
-			for conn := range manager.clients {
+			m := &Message{}
+			json.Unmarshal(message, m)
+			for conn := range manager.clients[m.RoomIdNum] {
 				select {
 				case conn.send <- message:
 				default:
 					close(conn.send)
-					delete(manager.clients, conn)
+					delete(manager.clients[m.RoomIdNum], conn)
 				}
 			}
 		}
 	}
 }
 
-func (manager *ClientManager) send(message []byte, ignore *Client) {
-	fmt.Println("clients数量:" + strconv.Itoa(len(manager.clients)))
-	for conn := range manager.clients {
+func (manager *ClientManager) send(message []byte, roomIdNum int, ignore *Client) {
+	fmt.Println("clients数量:" + strconv.Itoa(len(manager.clients[roomIdNum])))
+	for conn := range manager.clients[roomIdNum] {
 		fmt.Println(conn,string(message))
 		fmt.Println("conn != ignore  判断结果为:", conn != ignore)
 		if conn != ignore {
@@ -159,7 +159,7 @@ func (c *Client) read() {
 
 		fmt.Println("nickname", user.Username)
 
-		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: jsonContent.Val, Nickname : user.Username})
+		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, RoomIdNum:c.roomIdNum, Content: jsonContent.Val, Nickname : user.Username})
 		manager.broadcast <- jsonMessage
 	}
 }
@@ -217,13 +217,14 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	if !ok {
 		roomId = ""
 	}
+	roomIdNum,_ := strconv.Atoi(strings.Split(roomId, "_")[1])
 	sessionKey, ok := paramsMap["sessionKey"]
 	if !ok {
 		sessionKey = ""
 	}
 
 	uid, _:= uuid.NewV4()
-	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte), roomId:roomId, sessionKey:sessionKey}
+	client := &Client{id: uid.String(), socket: conn, send: make(chan []byte), roomId:roomId, roomIdNum:roomIdNum, sessionKey:sessionKey}
 
 	manager.register <- client
 
