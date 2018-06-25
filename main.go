@@ -184,6 +184,7 @@ func (c *Client) write() {
 				return
 			}
 
+			println(message, c, c.sessionKey, c.roomId)
 			c.socket.WriteMessage(websocket.TextMessage, message)
 		}
 	}
