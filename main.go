@@ -101,7 +101,8 @@ func (manager *ClientManager) start() {
 		case message := <-manager.broadcast:
 			m := &Message{}
 			json.Unmarshal(message, m)
-			println(m.RoomIdNum, manager.clients, manager.clients[m.RoomIdNum])
+			ss, _ := json.Marshal(manager.clients[m.RoomIdNum])
+			println(m.RoomIdNum, manager.clients, string(ss))
 			for conn := range manager.clients[m.RoomIdNum] {
 				select {
 				case conn.send <- message:
