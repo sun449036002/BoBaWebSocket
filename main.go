@@ -102,8 +102,9 @@ func (manager *ClientManager) start() {
 			m := &Message{}
 			json.Unmarshal(message, m)
 			ss, _ := json.Marshal(manager.clients[m.RoomIdNum])
-			println(m.RoomIdNum, manager.clients, string(ss))
+			println(m.RoomIdNum, manager.clients, string(ss), len(manager.clients))
 			for conn := range manager.clients[m.RoomIdNum] {
+				println(conn)
 				select {
 				case conn.send <- message:
 				default:
