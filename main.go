@@ -104,7 +104,7 @@ func (manager *ClientManager) start() {
 			ss, _ := json.Marshal(manager.clients[m.RoomIdNum])
 			println(m.RoomIdNum, manager.clients, string(ss), len(manager.clients))
 			for conn := range manager.clients[m.RoomIdNum] {
-				println(conn)
+				println(message, conn)
 				select {
 				case conn.send <- message:
 				default:
@@ -174,9 +174,11 @@ func (c *Client) write() {
 		c.socket.Close()
 	}()
 
+	println(c.id)
 	for {
 		select {
 		case message, ok := <-c.send:
+			println(ok)
 			if !ok {
 				c.socket.WriteMessage(websocket.CloseMessage, []byte{})
 				return
