@@ -48,7 +48,6 @@ type Content struct {
 	Sk string
 }
 
-var thisRoomClients = make([]*Client, 0)
 var manager = ClientManager{
 	broadcast:  make(chan []byte),
 	register:   make(chan *Client),
@@ -65,8 +64,7 @@ func (manager *ClientManager) start() {
 	for {
 		select {
 		case conn := <-manager.register:
-			thisRoomClients = append(thisRoomClients, conn)
-			manager.clients[conn.roomIdNum] = thisRoomClients
+			manager.clients[conn.roomIdNum] = append(manager.clients[conn.roomIdNum], conn)
 			fmt.Println("register:room ID =", conn.roomId)
 			fmt.Println("register:sessionKey =", conn.sessionKey)
 
