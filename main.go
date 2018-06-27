@@ -101,10 +101,9 @@ func (manager *ClientManager) start() {
 		case message := <-manager.broadcast:
 			m := &Message{}
 			json.Unmarshal(message, m)
-			ss, _ := json.Marshal(manager.clients[m.RoomIdNum])
-			println(m.RoomIdNum, manager.clients, string(ss), len(manager.clients))
+			println("----- message manager.broadcast ----", m.PersonNum, m.RoomIdNum, manager.clients, len(manager.clients[m.RoomIdNum]), len(manager.clients))
 			for conn := range manager.clients[m.RoomIdNum] {
-				println(message, conn)
+				println("---------- in rage clients[m.RoomIdNum]------------------")
 				select {
 				case conn.send <- message:
 				default:
@@ -174,7 +173,7 @@ func (c *Client) write() {
 		c.socket.Close()
 	}()
 
-	println(c.id)
+	println("-----------func write-----------------")
 	for {
 		select {
 		case message, ok := <-c.send:
