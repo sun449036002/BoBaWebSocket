@@ -18,7 +18,7 @@ import (
 const ROOM_PERSON_NUMS_CACHE  = "room_person_nums_cache_%s"
 
 type ClientManager struct {
-	clients    map[int]map[*Client]bool
+	clients    map[int][]*Client
 	broadcast  chan []byte
 	register   chan *Client
 	unregister chan *Client
@@ -48,11 +48,12 @@ type Content struct {
 	Sk string
 }
 
+var thisRoomClients = make([]*Client, 0)
 var manager = ClientManager{
 	broadcast:  make(chan []byte),
 	register:   make(chan *Client),
 	unregister: make(chan *Client),
-	clients:    make(map[int]map[*Client]bool),
+	clients:    make(map[int][]*Client),
 }
 
 func (manager *ClientManager) start() {
@@ -64,8 +65,7 @@ func (manager *ClientManager) start() {
 	for {
 		select {
 		case conn := <-manager.register:
-			thisRoomClients := make(map[*Client]bool)
-			thisRoomClients[conn] = true
+			thisRoomClients = append(thisRoomClients, conn)
 			manager.clients[conn.roomIdNum] = thisRoomClients
 			fmt.Println("register:room ID =", conn.roomId)
 			fmt.Println("register:sessionKey =", conn.sessionKey)
@@ -81,34 +81,36 @@ func (manager *ClientManager) start() {
 			jsonMessage, _ := json.Marshal(&Message{Content: "我 来 也~~~~~~.", Nickname:user.Username, PersonNum:strconv.Itoa(int(num))})
 			manager.send(jsonMessage, conn.roomIdNum, conn)
 		case conn := <-manager.unregister:
-			if _, ok := manager.clients[conn.roomIdNum][conn]; ok {
-				close(conn.send)
-				delete(manager.clients[conn.roomIdNum], conn)
+			for index, _conn := range manager.clients[conn.roomIdNum] {
+				if _conn == conn {
+					close(conn.send)
+					manager.clients[conn.roomIdNum] = append(manager.clients[conn.roomIdNum][:index], manager.clients[conn.roomIdNum][index+1:]...)
 
-				//在线人数
-				num := len(manager.clients[conn.roomIdNum])
-				fmt.Println("unregister 在线人数:", num)
+					//在线人数
+					num := len(manager.clients[conn.roomIdNum])
+					fmt.Println("unregister 在线人数:", num)
 
-				user, err := GetUserBySessionKey(rc, conn.sessionKey)
-				if err != nil {
-					fmt.Println(err.Error())
-					continue
+					user, err := GetUserBySessionKey(rc, conn.sessionKey)
+					if err != nil {
+						fmt.Println(err.Error())
+						continue
+					}
+
+					jsonMessage, _ := json.Marshal(&Message{Content: "静静的我的走了，不带走一点云彩.", Nickname:user.Username, PersonNum:strconv.Itoa(int(num))})
+					manager.send(jsonMessage, conn.roomIdNum, conn)
 				}
-
-				jsonMessage, _ := json.Marshal(&Message{Content: "静静的我的走了，不带走一点云彩.", Nickname:user.Username, PersonNum:strconv.Itoa(int(num))})
-				manager.send(jsonMessage, conn.roomIdNum, conn)
 			}
 		case message := <-manager.broadcast:
 			m := &Message{}
 			json.Unmarshal(message, m)
-			println("----- message manager.broadcast ----", m.PersonNum, m.RoomIdNum, manager.clients, len(manager.clients[m.RoomIdNum]), len(manager.clients))
-			for conn := range manager.clients[m.RoomIdNum] {
-				println("---------- in rage clients[m.RoomIdNum]------------------")
+			println("----- message manager.broadcast ----", m.PersonNum, m.RoomIdNum, len(manager.clients[m.RoomIdNum]))
+			for index, conn := range manager.clients[m.RoomIdNum] {
+				println("---------- in range clients[m.RoomIdNum]------------------")
 				select {
 				case conn.send <- message:
 				default:
 					close(conn.send)
-					delete(manager.clients[m.RoomIdNum], conn)
+					manager.clients[conn.roomIdNum] = append(manager.clients[conn.roomIdNum][:index], manager.clients[conn.roomIdNum][index+1:]...)
 				}
 			}
 		}
@@ -117,7 +119,7 @@ func (manager *ClientManager) start() {
 
 func (manager *ClientManager) send(message []byte, roomIdNum int, ignore *Client) {
 	fmt.Println("clients数量:" + strconv.Itoa(len(manager.clients[roomIdNum])))
-	for conn := range manager.clients[roomIdNum] {
+	for _, conn := range manager.clients[roomIdNum] {
 		fmt.Println(conn,string(message))
 		fmt.Println("conn != ignore  判断结果为:", conn != ignore)
 		//if conn != ignore {
