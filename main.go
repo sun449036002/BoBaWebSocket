@@ -91,7 +91,7 @@ func (manager *ClientManager) start() {
 
 					user, err := GetUserBySessionKey(rc, conn.sessionKey)
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println("GetUserBySessionKey err====>", err.Error())
 						continue
 					}
 
