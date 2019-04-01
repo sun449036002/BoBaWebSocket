@@ -16,8 +16,8 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-331">
-              <caret line="218" column="35" lean-forward="false" selection-start-line="218" selection-start-column="35" selection-end-line="218" selection-end-column="35" />
+            <state relative-caret-position="311">
+              <caret line="184" column="52" lean-forward="false" selection-start-line="184" selection-start-column="52" selection-end-line="184" selection-end-column="52" />
               <folding />
             </state>
           </provider>
@@ -46,6 +46,9 @@
     <findStrings>
       <find>broadcast</find>
       <find>GetUserBySessionKey</find>
+      <find>fmt.Println</find>
+      <find>.send</find>
+      <find>CloseMessage</find>
     </findStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
@@ -199,10 +202,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://C:/Go/src/builtin/builtin.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="219" column="5" lean-forward="false" selection-start-line="219" selection-start-column="5" selection-end-line="219" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-331">
-          <caret line="218" column="35" lean-forward="false" selection-start-line="218" selection-start-column="35" selection-end-line="218" selection-end-column="35" />
+        <state relative-caret-position="311">
+          <caret line="184" column="52" lean-forward="false" selection-start-line="184" selection-start-column="52" selection-end-line="184" selection-end-column="52" />
           <folding />
         </state>
       </provider>

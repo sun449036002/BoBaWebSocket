@@ -176,17 +176,18 @@ func (c *Client) write() {
 		c.socket.Close()
 	}()
 
-	println("-----------func write-----------------")
+	fmt.Println("-----------func write-----------------")
 	for {
 		select {
-		case message, ok := <-c.send:
-			println(ok)
+		case message, ok := <- c.send:
+			fmt.Println("c.send.ok ==>", ok)
 			if !ok {
+				fmt.Println("when not ok message is ===> ", string(message))
 				c.socket.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			println(message, c, c.sessionKey, c.roomId)
+			fmt.Println(string(message), c, c.sessionKey, c.roomId)
 			c.socket.WriteMessage(websocket.TextMessage, message)
 		}
 	}
