@@ -138,7 +138,7 @@ func (c *Client) read() {
 	for {
 		_, message, err := c.socket.ReadMessage()
 		if err != nil {
-			fmt.Print("ReadMessage first error", err)
+			fmt.Println("ReadMessage first error", err)
 			manager.unregister <- c
 			c.socket.Close()
 			break
@@ -198,6 +198,7 @@ func main() {
 	fmt.Println("Starting application...")
 	go manager.start()
 	http.HandleFunc("/wss", wsPage)
+	http.HandleFunc("/ques", wsQues)
 	http.ListenAndServe(":12345", nil)
 }
 
@@ -243,6 +244,39 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	go client.read()
 	go client.write()
 	//fmt.Println("server start ok")
+}
+
+/**
+问题ws
+ */
+func wsQues(res http.ResponseWriter, req *http.Request) {
+	conn, error := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}).Upgrade(res, req, nil)
+
+	if error != nil {
+		http.NotFound(res, req)
+		fmt.Println("Upgrader error ==>", error)
+		return
+	}
+
+	if error != nil {
+		http.NotFound(res, req)
+		fmt.Println("Upgrader error ==>", error)
+		return
+	}
+
+	bts := make([]byte, 0)
+	lens, _ := req.Body.Read(bts)
+	fmt.Println("request" , lens, bts, req.Host, req.Method)
+
+	paramsMap := make(map[string]string)
+	paramStr := strings.SplitAfter(req.URL.String(), "?")[1]
+	params := strings.Split(paramStr, "&")
+	for i := 0; i < len(params); i++ {
+		fmt.Println("params i ===> ", params[i])
+		kv := strings.Split(params[i], "=")
+		paramsMap[kv[0]] = kv[1]
+	}
+	fmt.Println("conn ===> ", conn)
 }
 
 
