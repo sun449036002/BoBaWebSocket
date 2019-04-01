@@ -138,6 +138,7 @@ func (c *Client) read() {
 	for {
 		_, message, err := c.socket.ReadMessage()
 		if err != nil {
+			fmt.Print("ReadMessage first error", err)
 			manager.unregister <- c
 			c.socket.Close()
 			break
