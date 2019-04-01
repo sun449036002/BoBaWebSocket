@@ -83,6 +83,7 @@ func (manager *ClientManager) start() {
 				if _conn == conn {
 					close(conn.send)
 					manager.clients[conn.roomIdNum] = append(manager.clients[conn.roomIdNum][:index], manager.clients[conn.roomIdNum][index+1:]...)
+					fmt.Println("unregister:room ID =", conn.roomId)
 
 					//在线人数
 					num := len(manager.clients[conn.roomIdNum])
@@ -119,11 +120,13 @@ func (manager *ClientManager) send(message []byte, roomIdNum int, ignore *Client
 	fmt.Println("clients数量:" + strconv.Itoa(len(manager.clients[roomIdNum])))
 	for _, conn := range manager.clients[roomIdNum] {
 		fmt.Println(conn,string(message))
-		fmt.Println("conn != ignore  判断结果为:", conn != ignore)
+		fmt.Println("conn != ignore ====> ", conn != ignore)
 		//if conn != ignore {
 			conn.send <- message
 		//}
 	}
+	fmt.Println()
+	fmt.Println()
 }
 
 func (c *Client) read() {
