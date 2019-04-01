@@ -16,8 +16,8 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="314">
-              <caret line="93" column="65" lean-forward="false" selection-start-line="93" selection-start-column="65" selection-end-line="93" selection-end-column="65" />
+            <state relative-caret-position="-331">
+              <caret line="218" column="35" lean-forward="false" selection-start-line="218" selection-start-column="35" selection-end-line="218" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -201,8 +201,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="314">
-          <caret line="93" column="65" lean-forward="false" selection-start-line="93" selection-start-column="65" selection-end-line="93" selection-end-column="65" />
+        <state relative-caret-position="-331">
+          <caret line="218" column="35" lean-forward="false" selection-start-line="218" selection-start-column="35" selection-end-line="218" selection-end-column="35" />
           <folding />
         </state>
       </provider>

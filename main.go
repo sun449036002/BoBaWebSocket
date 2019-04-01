@@ -204,7 +204,7 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 
 	if error != nil {
 		http.NotFound(res, req)
-		fmt.Println(error)
+		fmt.Println("Upgrader error ==>", error)
 		return
 	}
 
@@ -216,7 +216,7 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 	paramStr := strings.SplitAfter(req.URL.String(), "?")[1]
 	params := strings.Split(paramStr, "&")
 	for i := 0; i < len(params); i++ {
-		fmt.Println(params[i])
+		fmt.Println("params i ===> ", params[i])
 		kv := strings.Split(params[i], "=")
 		paramsMap[kv[0]] = kv[1]
 	}
