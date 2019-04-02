@@ -167,7 +167,7 @@ func (c *Client) read() {
 
 		fmt.Println("nickname", user.Username)
 
-		cacheKey := "riddle_answer_" + string(c.roomIdNum)
+		cacheKey := "riddle_answer_room_" + string(c.roomIdNum)
 		answer, err := redis.String(rc.Do("get", cacheKey))
 		if err != nil {
 			fmt.Println("answer`s error is ", err)
