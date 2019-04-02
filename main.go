@@ -167,6 +167,17 @@ func (c *Client) read() {
 
 		fmt.Println("nickname", user.Username)
 
+		cacheKey := "riddle_answer_" + string(c.roomIdNum)
+		answer, err := redis.String(rc.Do("get", cacheKey))
+		if err != nil {
+			fmt.Println("answer`s error is ", err)
+		}
+
+		fmt.Println("answer is ", answer)
+		if answer != "" && strings.Contains(answer, jsonContent.Val) {
+			jsonContent.Val += "（恭喜" + user.Username + "回答正确~~~！)"
+		}
+
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, RoomIdNum:c.roomIdNum, Content: jsonContent.Val, Nickname : user.Username})
 		manager.broadcast <- jsonMessage
 	}
