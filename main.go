@@ -167,7 +167,7 @@ func (c *Client) read() {
 
 		fmt.Println("nickname", user.Username)
 
-		cacheKey := "riddle_answer_room_" + strconv.Itoa(c.roomIdNum)
+		cacheKey := "riddle_answer_" + strconv.Itoa(c.roomIdNum)
 		fmt.Println("answer cache key is ", cacheKey)
 		answer, err := redis.String(rc.Do("get", cacheKey))
 		if err != nil {
