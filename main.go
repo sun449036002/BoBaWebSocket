@@ -168,6 +168,7 @@ func (c *Client) read() {
 		fmt.Println("nickname", user.Username)
 
 		cacheKey := "riddle_answer_room_" + string(c.roomIdNum)
+		fmt.Println("answer cache key is ", cacheKey)
 		answer, err := redis.String(rc.Do("get", cacheKey))
 		if err != nil {
 			fmt.Println("answer`s error is ", err)
