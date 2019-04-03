@@ -41,6 +41,9 @@ type Message struct {
 	Nickname   string `json:"nickname,omitempty"`
 	AvatarUrl   string `json:"avatarUrl,omitempty"`
 	PersonNum   string `json:"personNum,omitempty"`
+
+	//是否刷新下一谜题
+	RefreshRiddle bool `json:"refreshRiddle,omitempty"`
 }
 
 type Content struct {
@@ -174,15 +177,18 @@ func (c *Client) read() {
 			fmt.Println("answer`s error is ", err)
 		}
 
+		msg := &Message{Sender: c.id, RoomIdNum:c.roomIdNum, Content: jsonContent.Val, Nickname : user.Username}
 		fmt.Println("answer is ", answer)
 		if answer != "" && strings.Contains(answer, strings.TrimSpace(jsonContent.Val)) {
 			jsonContent.Val += "（恭喜" + user.Username + "回答正确~~~！)"
 
 			//有人回答正确后，清除当前的答案KEY
 			rc.Do("del", cacheKey)
+
+			msg.RefreshRiddle = true
 		}
 
-		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, RoomIdNum:c.roomIdNum, Content: jsonContent.Val, Nickname : user.Username})
+		jsonMessage, _ := json.Marshal(msg)
 		manager.broadcast <- jsonMessage
 	}
 }
