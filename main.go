@@ -186,6 +186,7 @@ func (c *Client) read() {
 			rc.Do("del", cacheKey)
 
 			msg.RefreshRiddle = true
+			msg.Content = jsonContent.Val
 		}
 
 		jsonMessage, _ := json.Marshal(msg)
