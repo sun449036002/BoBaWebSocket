@@ -175,8 +175,11 @@ func (c *Client) read() {
 		}
 
 		fmt.Println("answer is ", answer)
-		if answer != "" && strings.Contains(answer, jsonContent.Val) {
+		if answer != "" && strings.Contains(answer, strings.TrimSpace(jsonContent.Val)) {
 			jsonContent.Val += "（恭喜" + user.Username + "回答正确~~~！)"
+
+			//有人回答正确后，清除当前的答案KEY
+			rc.Do("del", cacheKey)
 		}
 
 		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, RoomIdNum:c.roomIdNum, Content: jsonContent.Val, Nickname : user.Username})
